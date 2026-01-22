@@ -8,7 +8,17 @@
 <body>
 
 <h1>SkinJector</h1>
-<p>Upload a skin to generate a resource pack (Minecraft &lt; 1.19)</p>
+<p>Generate a resource pack for non-premium Minecraft skins</p>
+
+<label>
+    Game version (up to 1.19):
+    <select id="mcVersion">
+        <option value="6">1.16 – 1.17</option>
+        <option value="8" selected>1.18 – 1.19</option>
+    </select>
+</label>
+
+<br><br>
 
 <input type="file" id="skinInput" accept="image/png">
 <br><br>
@@ -17,6 +27,8 @@
 <script>
 async function generatePack() {
     const input = document.getElementById("skinInput");
+    const packFormat = document.getElementById("mcVersion").value;
+
     if (!input.files.length) {
         alert("Please upload a skin.");
         return;
@@ -30,12 +42,12 @@ async function generatePack() {
     // pack.mcmeta
     zip.file("pack.mcmeta", JSON.stringify({
         pack: {
-            pack_format: 8,
+            pack_format: Number(packFormat),
             description: "SkinJector Resource Pack"
         }
     }, null, 2));
 
-    // skin
+    // skin file
     zip.file(
         "assets/minecraft/textures/entity/steve.png",
         skinData
