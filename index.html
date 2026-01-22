@@ -4,98 +4,80 @@
 <meta charset="UTF-8">
 <title>SkinJector</title>
 
-<!-- Minecraft-like font -->
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 
 <style>
-    body {
-        margin: 0;
-        height: 100vh;
-        background: linear-gradient(#1b1b1b, #111);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-family: Arial, sans-serif;
-        color: white;
-    }
-
-    .container {
-        background: #222;
-        border: 2px solid #3c8527;
-        border-radius: 8px;
-        padding: 30px;
-        width: 400px;
-        box-shadow: 0 0 25px rgba(0,0,0,0.8);
-        text-align: center;
-    }
-
-    h1 {
-        font-family: 'Press Start 2P', cursive;
-        font-size: 20px;
-        color: #6cc349;
-        margin-bottom: 10px;
-    }
-
-    p {
-        font-size: 13px;
-        color: #ccc;
-        margin-bottom: 20px;
-    }
-
-    label {
-        font-size: 12px;
-        display: block;
-        margin-bottom: 6px;
-        text-align: left;
-    }
-
-    select, input[type="file"] {
-        width: 100%;
-        padding: 8px;
-        background: #111;
-        border: 1px solid #555;
-        color: white;
-        border-radius: 4px;
-        margin-bottom: 15px;
-    }
-
-    button {
-        width: 100%;
-        padding: 12px;
-        background: #3c8527;
-        border: none;
-        color: white;
-        font-size: 14px;
-        font-weight: bold;
-        border-radius: 4px;
-        cursor: pointer;
-        transition: background 0.2s;
-    }
-
-    button:hover {
-        background: #55aa3f;
-    }
-
-    footer {
-        margin-top: 15px;
-        font-size: 11px;
-        color: #888;
-    }
+body {
+    margin: 0;
+    height: 100vh;
+    background: linear-gradient(#1b1b1b, #111);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: Arial, sans-serif;
+    color: white;
+}
+.container {
+    background: #222;
+    border: 2px solid #3c8527;
+    border-radius: 8px;
+    padding: 30px;
+    width: 400px;
+    box-shadow: 0 0 25px rgba(0,0,0,0.8);
+}
+h1 {
+    font-family: 'Press Start 2P', cursive;
+    font-size: 18px;
+    color: #6cc349;
+    text-align: center;
+}
+label {
+    font-size: 12px;
+    margin-top: 10px;
+    display: block;
+}
+input, select {
+    width: 100%;
+    padding: 8px;
+    margin-top: 4px;
+    background: #111;
+    color: white;
+    border: 1px solid #555;
+    border-radius: 4px;
+}
+button {
+    width: 100%;
+    margin-top: 15px;
+    padding: 12px;
+    background: #3c8527;
+    border: none;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+}
+button:hover {
+    background: #55aa3f;
+}
+footer {
+    margin-top: 10px;
+    font-size: 11px;
+    text-align: center;
+    color: #888;
+}
 </style>
 </head>
 
 <body>
-
 <div class="container">
     <h1>SkinJector</h1>
-    <p>Generate a resource pack to use custom skins in non-premium Minecraft</p>
+
+    <label>Username</label>
+    <input id="username" placeholder="Steve" maxlength="16">
 
     <label>Game version</label>
     <select id="mcVersion">
-        <option value="1">1.8</option>
-        <option value="1">1.9 – 1.10</option>
+        <option value="1">1.8 – 1.10</option>
         <option value="3">1.11 – 1.12</option>
         <option value="4">1.13 – 1.14</option>
         <option value="5">1.15 – 1.16.1</option>
@@ -103,68 +85,63 @@
         <option value="8" selected>1.18 – 1.19</option>
     </select>
 
-    <label>Upload skin (PNG)</label>
+    <label>Skin (PNG)</label>
     <input type="file" id="skinInput" accept="image/png">
 
     <button onclick="generatePack()">Generate Resource Pack</button>
 
-    <footer>
-        Compatible with Minecraft ≤ 1.19
-    </footer>
+    <footer>Minecraft ≤ 1.19</footer>
 </div>
 
 <script>
 async function generatePack() {
-    const input = document.getElementById("skinInput");
+    const skinInput = document.getElementById("skinInput");
+    const usernameRaw = document.getElementById("username").value.trim();
     const packFormat = Number(document.getElementById("mcVersion").value);
 
-    if (!input.files.length) {
-        alert("Please upload a skin.");
+    if (!usernameRaw || !skinInput.files.length) {
+        alert("Username and skin required.");
         return;
     }
 
-    const skinFile = input.files[0];
-    const skinData = await skinFile.arrayBuffer();
+    const username = usernameRaw.replace(/[^a-zA-Z0-9_]/g, "");
+    const packName = `${username} Skin Pack`;
 
-    // Load skin image
+    const skinFile = skinInput.files[0];
     const img = new Image();
     img.src = URL.createObjectURL(skinFile);
     await img.decode();
 
-    // Create pack icon (head)
+    // Create pack icon safely
     const canvas = document.createElement("canvas");
     canvas.width = 64;
     canvas.height = 64;
     const ctx = canvas.getContext("2d");
     ctx.imageSmoothingEnabled = false;
 
-    // Face area (Steve head)
     ctx.drawImage(img, 8, 8, 8, 8, 0, 0, 64, 64);
 
-    const packIcon = await new Promise(res =>
-        canvas.toBlob(res, "image/png")
-    );
+    const dataURL = canvas.toDataURL("image/png");
+    const packIcon = Uint8Array.from(atob(dataURL.split(",")[1]), c => c.charCodeAt(0));
 
     const zip = new JSZip();
 
     zip.file("pack.mcmeta", JSON.stringify({
         pack: {
             pack_format: packFormat,
-            description: "SkinJector Resource Pack"
+            description: packName
         }
     }, null, 2));
 
-    zip.file("assets/minecraft/textures/entity/steve.png", skinData);
     zip.file("pack.png", packIcon);
+    zip.file("assets/minecraft/textures/entity/steve.png", await skinFile.arrayBuffer());
 
     const blob = await zip.generateAsync({ type: "blob" });
     const a = document.createElement("a");
-
     a.href = URL.createObjectURL(blob);
-    a.download = "SkinJector.zip";
+    a.download = `${packName}.zip`;
     a.click();
 }
 </script>
-
 </body>
 </html>
