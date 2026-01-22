@@ -15,3 +15,10 @@ The system processes an uploaded skin and generates a ready-to-use resource pack
 🧱 Compatible with Minecraft versions below 1.19
 
 ⚡ Simple, fast, and lightweight
+
+<p align="center">
+  <a href="https://TU_USUARIO.github.io/TU_REPO/" target="_blank">
+    <img src="https://img.shields.io/badge/Open-SkinJector-brightgreen?style=for-the-badge&logo=github">
+  </a>
+</p>
+
