@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SkinJector</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+</head>
+<body>
+
+<h1>SkinJector</h1>
+<p>Upload a skin to generate a resource pack (Minecraft &lt; 1.19)</p>
+
+<input type="file" id="skinInput" accept="image/png">
+<br><br>
+<button onclick="generatePack()">Generate Resource Pack</button>
+
+<script>
+async function generatePack() {
+    const input = document.getElementById("skinInput");
+    if (!input.files.length) {
+        alert("Please upload a skin.");
+        return;
+    }
+
+    const skinFile = input.files[0];
+    const skinData = await skinFile.arrayBuffer();
+
+    const zip = new JSZip();
+
+    // pack.mcmeta
+    zip.file("pack.mcmeta", JSON.stringify({
+        pack: {
+            pack_format: 8,
+            description: "SkinJector Resource Pack"
+        }
+    }, null, 2));
+
+    // skin
+    zip.file(
+        "assets/minecraft/textures/entity/steve.png",
+        skinData
+    );
+
+    // generate zip
+    const content = await zip.generateAsync({ type: "blob" });
+
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(content);
+    a.download = "SkinJector.zip";
+    a.click();
+}
+</script>
+
+</body>
+</html>
