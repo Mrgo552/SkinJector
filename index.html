@@ -123,9 +123,35 @@ async function generatePack() {
         return;
     }
 
-    const skinData = await input.files[0].arrayBuffer();
+    const skinFile = input.files[0];
+    const skinData = await skinFile.arrayBuffer();
+
+    // Create image from skin
+    const img = new Image();
+    img.src = URL.createObjectURL(skinFile);
+    await img.decode();
+
+    // Create canvas for pack icon
+    const canvas = document.createElement("canvas");
+    canvas.width = 64;
+    canvas.height = 64;
+    const ctx = canvas.getContext("2d");
+    ctx.imageSmoothingEnabled = false;
+
+    // Draw face (8x8 -> 64x64)
+    ctx.drawImage(
+        img,
+        8, 8, 8, 8,   // source (face)
+        0, 0, 64, 64  // destination
+    );
+
+    const packIconBlob = await new Promise(res =>
+        canvas.toBlob(res, "image/png")
+    );
+
     const zip = new JSZip();
 
+    // pack.mcmeta
     zip.file("pack.mcmeta", JSON.stringify({
         pack: {
             pack_format: packFormat,
@@ -133,8 +159,13 @@ async function generatePack() {
         }
     }, null, 2));
 
+    // skin
     zip.file("assets/minecraft/textures/entity/steve.png", skinData);
 
+    // pack icon
+    zip.file("pack.png", packIconBlob);
+
+    // generate zip
     const blob = await zip.generateAsync({ type: "blob" });
     const a = document.createElement("a");
 
@@ -143,6 +174,7 @@ async function generatePack() {
     a.click();
 }
 </script>
+
 
 </body>
 </html>
