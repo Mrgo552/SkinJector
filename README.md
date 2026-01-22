@@ -1,17 +1,17 @@
 # 🧩 SkinJector
 
-SkinJector is a simple and lightweight system that allows you to use custom skins in non-premium Minecraft versions below 1.19.
+SkinJector is a web-based tool that automatically generates a Minecraft resource pack to apply custom skins in non-premium Minecraft versions below 1.19.
 
-It provides an easy way to inject and manage skins without requiring a premium account, focusing on compatibility, simplicity, and performance.
+The system processes an uploaded skin and generates a ready-to-use resource pack that works seamlessly with compatible Minecraft versions, without requiring a premium account.
 
 ✨ Features
 
-✅ Support for Minecraft versions below 1.19
+🌐 Web-based (no installation required)
 
-🎨 Custom skin injection for non-premium accounts
+📦 Automatic resource pack generation
 
-⚡ Lightweight and easy to use
+🎨 Custom skin support for non-premium players
 
-🔧 Simple configuration
+🧱 Compatible with Minecraft versions below 1.19
 
-🖥️ Compatible with custom launchers and clients
+⚡ Simple, fast, and lightweight
