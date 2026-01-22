@@ -1,4 +1,4 @@
-🧩# SkinJector
+# 🧩 SkinJector
 
 SkinJector is a simple and lightweight system that allows you to use custom skins in non-premium Minecraft versions below 1.19.
 
