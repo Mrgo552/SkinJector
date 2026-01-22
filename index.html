@@ -135,6 +135,7 @@ async function generatePack() {
 
     zip.file("pack.png", packIcon);
     zip.file("assets/minecraft/textures/entity/steve.png", await skinFile.arrayBuffer());
+    zip.file("assets/minecraft/textures/entity/alex.png", await skinFile.arrayBuffer());
 
     const blob = await zip.generateAsync({ type: "blob" });
     const a = document.createElement("a");
