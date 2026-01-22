@@ -23,7 +23,7 @@ body {
     border: 2px solid #3c8527;
     border-radius: 8px;
     padding: 30px;
-    width: 400px;
+    width: 420px;
     box-shadow: 0 0 25px rgba(0,0,0,0.8);
 }
 h1 {
@@ -31,10 +31,16 @@ h1 {
     font-size: 18px;
     color: #6cc349;
     text-align: center;
+    margin-bottom: 15px;
+}
+p {
+    font-size: 13px;
+    color: #ccc;
+    text-align: center;
 }
 label {
     font-size: 12px;
-    margin-top: 10px;
+    margin-top: 12px;
     display: block;
 }
 input, select {
@@ -48,19 +54,20 @@ input, select {
 }
 button {
     width: 100%;
-    margin-top: 15px;
+    margin-top: 18px;
     padding: 12px;
     background: #3c8527;
     border: none;
     color: white;
     font-weight: bold;
     cursor: pointer;
+    border-radius: 4px;
 }
 button:hover {
     background: #55aa3f;
 }
 footer {
-    margin-top: 10px;
+    margin-top: 12px;
     font-size: 11px;
     text-align: center;
     color: #888;
@@ -71,6 +78,7 @@ footer {
 <body>
 <div class="container">
     <h1>SkinJector</h1>
+    <p>Generate a resource pack to use custom skins in non-premium Minecraft</p>
 
     <label>Username</label>
     <input id="username" placeholder="Steve" maxlength="16">
@@ -90,7 +98,7 @@ footer {
 
     <button onclick="generatePack()">Generate Resource Pack</button>
 
-    <footer>Minecraft ≤ 1.19</footer>
+    <footer>Compatible with Minecraft ≤ 1.19</footer>
 </div>
 
 <script>
@@ -100,7 +108,7 @@ async function generatePack() {
     const packFormat = Number(document.getElementById("mcVersion").value);
 
     if (!usernameRaw || !skinInput.files.length) {
-        alert("Username and skin required.");
+        alert("Username and skin are required.");
         return;
     }
 
@@ -108,11 +116,16 @@ async function generatePack() {
     const packName = `${username} Skin Pack`;
 
     const skinFile = skinInput.files[0];
+
+    // LEER LA SKIN UNA SOLA VEZ (CLAVE)
+    const skinBuffer = await skinFile.arrayBuffer();
+
+    // Cargar imagen para icono
     const img = new Image();
     img.src = URL.createObjectURL(skinFile);
     await img.decode();
 
-    // Create pack icon safely
+    // Crear icono del pack (cara)
     const canvas = document.createElement("canvas");
     canvas.width = 64;
     canvas.height = 64;
@@ -121,11 +134,15 @@ async function generatePack() {
 
     ctx.drawImage(img, 8, 8, 8, 8, 0, 0, 64, 64);
 
-    const dataURL = canvas.toDataURL("image/png");
-    const packIcon = Uint8Array.from(atob(dataURL.split(",")[1]), c => c.charCodeAt(0));
+    const iconDataURL = canvas.toDataURL("image/png");
+    const packIcon = Uint8Array.from(
+        atob(iconDataURL.split(",")[1]),
+        c => c.charCodeAt(0)
+    );
 
     const zip = new JSZip();
 
+    // pack.mcmeta
     zip.file("pack.mcmeta", JSON.stringify({
         pack: {
             pack_format: packFormat,
@@ -133,10 +150,14 @@ async function generatePack() {
         }
     }, null, 2));
 
-    zip.file("pack.png", packIcon);
-    zip.file("assets/minecraft/textures/entity/steve.png", await skinFile.arrayBuffer());
-    zip.file("assets/minecraft/textures/entity/alex.png", await skinFile.arrayBuffer());
+    // SKINS (STEVE + ALEX) — MISMO BUFFER
+    zip.file("assets/minecraft/textures/entity/steve.png", skinBuffer);
+    zip.file("assets/minecraft/textures/entity/alex.png", skinBuffer);
 
+    // ICONO
+    zip.file("pack.png", packIcon);
+
+    // Generar ZIP
     const blob = await zip.generateAsync({ type: "blob" });
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
