@@ -85,12 +85,8 @@ footer {
 
     <label>Game version</label>
     <select id="mcVersion">
-        <option value="1">1.8 – 1.10</option>
-        <option value="3">1.11 – 1.12</option>
-        <option value="4">1.13 – 1.14</option>
-        <option value="5">1.15 – 1.16.1</option>
-        <option value="6">1.16.2 – 1.17</option>
-        <option value="8" selected>1.18 – 1.19</option>
+        <option value="8">1.8 – 1.19.2</option>
+        <option value="34" selected>1.19.3 – 1.21+</option>
     </select>
 
     <label>Skin (PNG)</label>
@@ -98,7 +94,7 @@ footer {
 
     <button onclick="generatePack()">Generate Resource Pack</button>
 
-    <footer>Compatible with Minecraft ≤ 1.19</footer>
+    <footer>Compatible with Minecraft 1.8 – 1.21+</footer>
 </div>
 
 <script>
@@ -113,11 +109,14 @@ async function generatePack() {
     }
 
     const username = usernameRaw.replace(/[^a-zA-Z0-9_]/g, "");
-    const packName = `${username} Skin Pack`;
+    
+    // Determinar rango de versión para el nombre del archivo
+    const versionRange = packFormat >= 12 ? "1.19.3-1.21+" : "1.8-1.19.2";
+    const packName = `${username} Skin Pack ${versionRange}`;
 
     const skinFile = skinInput.files[0];
 
-    // LEER LA SKIN UNA SOLA VEZ (CLAVE)
+    // Leer la skin una sola vez
     const skinBuffer = await skinFile.arrayBuffer();
 
     // Cargar imagen para icono
@@ -150,11 +149,31 @@ async function generatePack() {
         }
     }, null, 2));
 
-    // SKINS (STEVE + ALEX) — MISMO BUFFER
-    zip.file("assets/minecraft/textures/entity/steve.png", skinBuffer);
-    zip.file("assets/minecraft/textures/entity/alex.png", skinBuffer);
+    // Determinar qué skins reemplazar según la versión
+    const isModernVersion = packFormat >= 12; // 1.19.3+
 
-    // ICONO
+    if (isModernVersion) {
+        // VERSIONES 1.19.3+ (Con las nuevas 7 skins + Steve y Alex)
+        const wideSkins = ['steve', 'ari', 'efe', 'kai', 'makena', 'noor', 'sunny', 'zuri','alex'];
+        const slimSkins = ['alex', 'ari', 'efe', 'kai', 'makena', 'noor', 'sunny', 'zuri','steve'];
+        
+        // Wide (modelo Steve)
+        wideSkins.forEach(skinName => {
+            zip.file(`assets/minecraft/textures/entity/player/wide/${skinName}.png`, skinBuffer);
+        });
+        
+        // Slim (modelo Alex)
+        slimSkins.forEach(skinName => {
+            zip.file(`assets/minecraft/textures/entity/player/slim/${skinName}.png`, skinBuffer);
+        });
+        
+    } else {
+        // VERSIONES 1.8 - 1.19.2 (Steve y Alex tradicionales)
+        zip.file("assets/minecraft/textures/entity/steve.png", skinBuffer);
+        zip.file("assets/minecraft/textures/entity/alex.png", skinBuffer);
+    }
+
+    // Icono del pack
     zip.file("pack.png", packIcon);
 
     // Generar ZIP
